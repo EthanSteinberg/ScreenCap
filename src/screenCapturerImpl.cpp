@@ -30,6 +30,7 @@ ScreenCapturerImpl::ScreenCapturerImpl()
    
    shminfo.readOnly = False;
    first = true;
+   stopped = false;
    clock = Clock::create();
 }
 
@@ -42,27 +43,39 @@ void ScreenCapturerImpl::setMessageQueue(boost::shared_ptr<MessageQueue> theQueu
 {
    queue = theQueue;
 }
+void ScreenCapturerImpl::setScreenRecieverQueue(boost::shared_ptr<MessageQueue> theQueue)
+{
+   recieverQueue = theQueue;
+}
+
+void ScreenCapturerImpl::stopCapture()
+{
+   queue->pushIn(boost::function<void(void)>());
+   stopped = true;
+   printf("Screen capture stop\n");
+   recieverQueue->pushIn(boost::bind(&ScreenReciever::stopProcess,reciever));
+}
 
 void ScreenCapturerImpl::setImageManager()
 {
    manager = ImageManager::create(width,height);
-   queue->pushIn(boost::bind(&ScreenReciever::setImageManager,reciever,manager));
-   queue->pushIn(boost::bind(&ScreenReciever::setSize,reciever,width,height));
+   recieverQueue->pushIn(boost::bind(&ScreenReciever::setImageManager,reciever,manager));
+   recieverQueue->pushIn(boost::bind(&ScreenReciever::setSize,reciever,width,height));
    
 }
 
 void ScreenCapturerImpl::captureScreen()
 {
+   if (stopped)
+      return;
+
    if (first)
    {
       clock->init();
       first = false;
    }
 
-   else
-      clock->sleepUntilNext(1.0/20.0);
    double time = clock->getSeconds();
-
    auto stuff = manager->getImage();
 
    shminfo.shmid = stuff->shmid;
@@ -76,19 +89,13 @@ void ScreenCapturerImpl::captureScreen()
 
    XShmDetach(display,&shminfo);
 
-
-   //unsigned char* bigArray = new unsigned char[width * height * 4];
-   //unsigned char* bigArray = (unsigned char*)image->data;
-   //memcpy(bigArray, image->data, width * height * 4);
-  
-
-   //printf("%d %d %d\n",image->depth,image->bytes_per_line,image->bits_per_pixel);
-
-   
    stuff->time = time;
    //printf("I have captured a screen at %f\n",time);
 
-   queue->pushIn(boost::bind(&ScreenReciever::processScreen,reciever,stuff));
+   recieverQueue->pushIn(boost::bind(&ScreenReciever::processScreen,reciever,stuff));
+   
+   clock->sleepUntilNext(1.0/30.0);
+   queue->pushIn(boost::bind(&ScreenCapturer::captureScreen,this));
 }
 
 void ScreenCapturerImpl::setScreenReciever(boost::shared_ptr<ScreenReciever> theReciever)

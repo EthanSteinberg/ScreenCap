@@ -1,6 +1,7 @@
 #include "clockMono.hpp"
 
 #include <boost/make_shared.hpp>
+#include <cstring>
 
 boost::shared_ptr<Clock> Clock::create()
 {
@@ -37,9 +38,16 @@ void ClockMono::sleepUntilNext(double interval)
       request.tv_nsec -= 999999999;
       seconds++;
    }
-   request.tv_sec = seconds;
+   request.tv_sec = seconds + start.tv_sec;
 
-   clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &request,NULL);
+   int error = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &request,NULL);
+   if (error != 0)
+   {
+      char buffer[60];
+      strerror_r(error,buffer,sizeof(buffer));
+      printf("The error was %s\n",buffer);
+      exit(1);
+   }
 }
 
    

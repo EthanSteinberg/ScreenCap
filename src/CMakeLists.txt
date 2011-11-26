@@ -7,8 +7,10 @@ set(SRCS
       threadRunnerSimple.cpp
       screenCapturerImpl.cpp
       screenRecieverX264.cpp
-      imageManagerSimple.cpp
+      imageManagerComplex.cpp
       clockMono.cpp
+      screenDumperX264.cpp
+      signalHandlerImpl.cpp
 )
  
 add_executable(Test ${HDRS} ${SRCS})

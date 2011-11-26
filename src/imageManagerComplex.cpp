@@ -1,4 +1,4 @@
-#include "imageManagerSimple.hpp"
+#include "imageManagerComplex.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -10,10 +10,10 @@
 
 boost::shared_ptr<ImageManager> ImageManager::create(int width, int height)
 {
-   return boost::make_shared<ImageManagerSimple>(width,height);
+   return boost::make_shared<ImageManagerComplex>(width,height);
 }
 
-ImageManagerSimple::ImageManagerSimple(int Width, int Height) : width(Width), height(Height), size(width *height * 4)
+ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), height(Height), size(width *height * 4)
 {
 
 
@@ -22,21 +22,22 @@ ImageManagerSimple::ImageManagerSimple(int Width, int Height) : width(Width), he
    fd = eventfd(5, EFD_SEMAPHORE);
 }
 
-ImageManagerSimple::~ImageManagerSimple()
+ImageManagerComplex::~ImageManagerComplex()
 {
    //shmctl(id, IPC_RMID,0);
    //shmdt(pointerToBig);
 }
 
-boost::shared_ptr<ImageType> ImageManagerSimple::getImage()
+boost::shared_ptr<ImageType> ImageManagerComplex::getImage()
 {
    uint64_t val;
    read(fd,&val,sizeof(val));
 
+   boost::shared_ptr<ImageType> image;
    {
       boost::lock_guard<boost::mutex> lock(mutex);
 
-      auto image = boost::make_shared<ImageType>();
+      image = boost::make_shared<ImageType>();
       image->shmid = shmget(IPC_PRIVATE , width * height * 4, IPC_CREAT | 0777);
       image->shmaddr = (unsigned char *) shmat(image->shmid,0,0);
    }
@@ -44,7 +45,7 @@ boost::shared_ptr<ImageType> ImageManagerSimple::getImage()
    return image;
 }
 
-void ImageManagerSimple::disposeImage(boost::shared_ptr<ImageType> image)
+void ImageManagerComplex::disposeImage(boost::shared_ptr<ImageType> image)
 {
    {
       boost::lock_guard<boost::mutex> lock(mutex);
