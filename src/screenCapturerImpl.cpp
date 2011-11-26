@@ -8,9 +8,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#include <CImg.h>
-using namespace cimg_library;
-
 boost::shared_ptr<ScreenCapturer> ScreenCapturer::create()
 {
    return boost::make_shared<ScreenCapturerImpl>();
@@ -32,20 +29,12 @@ ScreenCapturerImpl::ScreenCapturerImpl()
    image = XShmCreateImage(display,visual, 24,2, NULL, &shminfo,width, height);
    
    shminfo.readOnly = False;
-
-   /*
-   shminfo.shmid = shmget(IPC_PRIVATE, image->bytes_per_line * image->height, IPC_CREAT | 0777);
-   image->data = (char *)shmat(shminfo.shmid,0,0);
-   shminfo.shmaddr = image->data;
-   shminfo.readOnly = False;
-   */
-
+   first = true;
+   clock = Clock::create();
 }
 
 ScreenCapturerImpl::~ScreenCapturerImpl()
 {
-   //shmctl(shminfo.shmid,IPC_RMID,0);
-   //shmdt(image->data);
 }
 
 
@@ -64,6 +53,16 @@ void ScreenCapturerImpl::setImageManager()
 
 void ScreenCapturerImpl::captureScreen()
 {
+   if (first)
+   {
+      clock->init();
+      first = false;
+   }
+
+   else
+      clock->sleepUntilNext(1.0/20.0);
+   double time = clock->getSeconds();
+
    auto stuff = manager->getImage();
 
    shminfo.shmid = stuff->shmid;
@@ -72,7 +71,9 @@ void ScreenCapturerImpl::captureScreen()
 
    XShmAttach(display,&shminfo);
    
+
    XShmGetImage(display,root,image,0,0,AllPlanes);
+
    XShmDetach(display,&shminfo);
 
 
@@ -83,7 +84,10 @@ void ScreenCapturerImpl::captureScreen()
 
    //printf("%d %d %d\n",image->depth,image->bytes_per_line,image->bits_per_pixel);
 
-   //printf("I have captured a screen\n");
+   
+   stuff->time = time;
+   //printf("I have captured a screen at %f\n",time);
+
    queue->pushIn(boost::bind(&ScreenReciever::processScreen,reciever,stuff));
 }
 

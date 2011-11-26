@@ -30,6 +30,8 @@ extern "C" {
 
 #include <time.h>
 
+#include "clock.hpp"
+
 using namespace cimg_library;
 
 void fooFunc(int i)
@@ -40,19 +42,16 @@ void fooFunc(int i)
 
 int main()
 {
-
-   timespec res, mono;
-   clock_getres(CLOCK_MONOTONIC,&res);
-   clock_gettime(CLOCK_MONOTONIC,&mono);
-
+   avcodec_init();
+   avcodec_register_all();
+   av_register_all();
 
    auto screenCapturerQueue = MessageQueue::create();
    auto screenRecieverQueue = MessageQueue::create();
 
    auto screenCapturer = ScreenCapturer::create();
    auto screenReciever = ScreenReciever::create();
-
-
+   
    screenCapturer->setMessageQueue(screenRecieverQueue);
    screenCapturer->setScreenReciever(screenReciever);
    screenCapturer->setImageManager();
@@ -127,9 +126,6 @@ int main()
 
 
 
-   avcodec_init();
-   avcodec_register_all();
-   av_register_all();
    int i, out_size, x, y, outbuf_size;
    uint8_t *outbuf;
 

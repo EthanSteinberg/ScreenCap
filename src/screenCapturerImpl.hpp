@@ -6,8 +6,7 @@
 #include <X11/extensions/XShm.h>
 
 #include "imageManager.hpp"
-
-#include <time.h>
+#include "clock.hpp"
 
 class ScreenCapturerImpl : public ScreenCapturer
 {
@@ -30,12 +29,13 @@ private:
    XShmSegmentInfo shminfo;
 
    bool first;
-   timespec startTime;
 
 
    boost::shared_ptr<ImageManager> manager;
    boost::shared_ptr<MessageQueue> queue;
    boost::shared_ptr<ScreenReciever> reciever;
+
+   boost::shared_ptr<Clock> clock;
 };
 
 

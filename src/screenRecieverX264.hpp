@@ -5,6 +5,8 @@
 #include <aio.h>
 
 class x264_t;
+class AVStream;
+class AVFormatContext;
 class ScreenRecieverX264 : public ScreenReciever
 {
    public:
@@ -23,6 +25,8 @@ class ScreenRecieverX264 : public ScreenReciever
       boost::shared_ptr<ImageManager> manager;
 
    x264_t* encoder;
+   AVStream *stream;
+   AVFormatContext *os;
 };
 
 #endif

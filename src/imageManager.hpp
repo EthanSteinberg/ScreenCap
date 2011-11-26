@@ -7,6 +7,7 @@ struct ImageType
 {
    int shmid;
    unsigned char *shmaddr;
+   double time;
 };
 
 class ImageManager
