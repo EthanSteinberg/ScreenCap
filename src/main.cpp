@@ -28,6 +28,8 @@ extern "C" {
 
 #include <boost/thread.hpp>
 
+#include <time.h>
+
 using namespace cimg_library;
 
 void fooFunc(int i)
@@ -38,6 +40,11 @@ void fooFunc(int i)
 
 int main()
 {
+
+   timespec res, mono;
+   clock_getres(CLOCK_MONOTONIC,&res);
+   clock_gettime(CLOCK_MONOTONIC,&mono);
+
 
    auto screenCapturerQueue = MessageQueue::create();
    auto screenRecieverQueue = MessageQueue::create();
@@ -60,6 +67,7 @@ int main()
 
 
    capturerThread.join();
+   screenRecieverQueue->pushIn(boost::bind(&ScreenReciever::stopProcess,screenReciever));
    screenRecieverQueue->pushIn(boost::function<void(void)>());
    recieverThread.join();
    return 0;

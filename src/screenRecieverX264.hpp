@@ -1,18 +1,15 @@
-#ifndef SCREEN_RECIEVER_PNG_HPP_INCLUDED
-#define SCREEN_RECIEVER_PNG_HPP_INCLUDED
+#ifndef SCREEN_RECIEVER_X264_HPP_INCLUDED
+#define SCREEN_RECIEVER_X264_HPP_INCLUDED
 
 #include "screenReciever.hpp"
 #include <aio.h>
 
-struct Frame
-{
-   aiocb* file;
-   double time;
-};
-
-class ScreenRecieverPng : public ScreenReciever
+class x264_t;
+class ScreenRecieverX264 : public ScreenReciever
 {
    public:
+   ScreenRecieverX264();
+   ~ScreenRecieverX264();
    virtual void setImageManager(boost::shared_ptr<ImageManager> manager);
    virtual void processScreen( boost::shared_ptr<ImageType> );
    virtual void setSize(int width, int height);
@@ -20,13 +17,12 @@ class ScreenRecieverPng : public ScreenReciever
 
    private:
 
-   int evFd;
+   int fileD;
       int width;
       int height;
       boost::shared_ptr<ImageManager> manager;
 
-      std::vector<Frame> frames;
-
+   x264_t* encoder;
 };
 
 #endif

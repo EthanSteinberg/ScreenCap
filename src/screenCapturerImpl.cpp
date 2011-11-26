@@ -21,7 +21,7 @@ ScreenCapturerImpl::ScreenCapturerImpl()
    display = XOpenDisplay(NULL);
    root = DefaultRootWindow(display);
 
-   Visual* visual = DefaultVisual(display, DefaultScreen(display));
+   visual = DefaultVisual(display, DefaultScreen(display));
    XWindowAttributes gwa;
 
    XGetWindowAttributes(display, root , &gwa);
@@ -30,15 +30,24 @@ ScreenCapturerImpl::ScreenCapturerImpl()
 
 
    image = XShmCreateImage(display,visual, 24,2, NULL, &shminfo,width, height);
+   
+   shminfo.readOnly = False;
 
+   /*
    shminfo.shmid = shmget(IPC_PRIVATE, image->bytes_per_line * image->height, IPC_CREAT | 0777);
    image->data = (char *)shmat(shminfo.shmid,0,0);
    shminfo.shmaddr = image->data;
    shminfo.readOnly = False;
-
-   printf("And the shm was %d\n", XShmAttach(display,&shminfo));
+   */
 
 }
+
+ScreenCapturerImpl::~ScreenCapturerImpl()
+{
+   //shmctl(shminfo.shmid,IPC_RMID,0);
+   //shmdt(image->data);
+}
+
 
 void ScreenCapturerImpl::setMessageQueue(boost::shared_ptr<MessageQueue> theQueue)
 {
@@ -49,42 +58,33 @@ void ScreenCapturerImpl::setImageManager()
 {
    manager = ImageManager::create(width,height);
    queue->pushIn(boost::bind(&ScreenReciever::setImageManager,reciever,manager));
+   queue->pushIn(boost::bind(&ScreenReciever::setSize,reciever,width,height));
+   
 }
 
 void ScreenCapturerImpl::captureScreen()
 {
+   auto stuff = manager->getImage();
+
+   shminfo.shmid = stuff->shmid;
+   image->data = (char*) stuff->shmaddr;
+   shminfo.shmaddr = image->data;
+
+   XShmAttach(display,&shminfo);
+   
    XShmGetImage(display,root,image,0,0,AllPlanes);
+   XShmDetach(display,&shminfo);
 
-   printf("%d %d %d\n",image->depth,image->format,1);
 
-   auto picture = manager->getImage();
-   
+   //unsigned char* bigArray = new unsigned char[width * height * 4];
+   //unsigned char* bigArray = (unsigned char*)image->data;
+   //memcpy(bigArray, image->data, width * height * 4);
+  
 
-   /* 
-   CImg<unsigned char> &pic = *picture;
+   //printf("%d %d %d\n",image->depth,image->bytes_per_line,image->bits_per_pixel);
 
-   unsigned long red_mask = image->red_mask;
-   unsigned long green_mask = image->green_mask;
-   unsigned long blue_mask = image->blue_mask;
-
-   for (int x = 0; x < width; x++)
-      for (int y = 0; y < height ; y++)
-      {
-         unsigned long pixel = XGetPixel(image,x,y);
-
-         unsigned char blue = pixel & blue_mask;
-         unsigned char green = (pixel & green_mask) >> 8;
-         unsigned char red = (pixel & red_mask) >> 16;
-
-         pic(x,y,0,0) = red;
-         pic(x,y,0,1) = green;
-         pic(x,y,0,2) = blue;
-      }
-
-   */
-   
-   printf("I have captured a screen\n");
-   queue->pushIn(boost::bind(&ScreenReciever::processScreen,reciever,picture));
+   //printf("I have captured a screen\n");
+   queue->pushIn(boost::bind(&ScreenReciever::processScreen,reciever,stuff));
 }
 
 void ScreenCapturerImpl::setScreenReciever(boost::shared_ptr<ScreenReciever> theReciever)

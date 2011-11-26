@@ -7,10 +7,13 @@
 
 #include "imageManager.hpp"
 
+#include <time.h>
+
 class ScreenCapturerImpl : public ScreenCapturer
 {
 public:
    ScreenCapturerImpl();
+   ~ScreenCapturerImpl();
    virtual void setMessageQueue(boost::shared_ptr<MessageQueue> queue);
    virtual void setScreenReciever(boost::shared_ptr<ScreenReciever> reciever);
    virtual void setImageManager();
@@ -19,11 +22,15 @@ public:
 private:
    
    Display* display;
+   Visual* visual;
    Window root;
    XImage* image;
    int width;
    int height;
    XShmSegmentInfo shminfo;
+
+   bool first;
+   timespec startTime;
 
 
    boost::shared_ptr<ImageManager> manager;

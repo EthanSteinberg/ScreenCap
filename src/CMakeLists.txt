@@ -6,7 +6,7 @@ set(SRCS
       messageQueueLocked.cpp
       threadRunnerSimple.cpp
       screenCapturerImpl.cpp
-      screenRecieverPng.cpp
+      screenRecieverX264.cpp
       imageManagerSimple.cpp
 )
  

@@ -3,9 +3,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <CImg.h>
-
-typedef cimg_library::CImg<unsigned char> ImageType;
+struct ImageType
+{
+   int shmid;
+   unsigned char *shmaddr;
+};
 
 class ImageManager
 {

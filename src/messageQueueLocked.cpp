@@ -18,7 +18,7 @@ boost::function< void(void)> MessageQueueLocked::getNextOrWait()
 {
    uint64_t num;
    read(readfd,&num, sizeof(num));
-   printf("The amount was %ld\n",num);
+   //printf("The amount was %ld\n",num);
    boost::function<void (void)> func;
 
    {

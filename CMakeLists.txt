@@ -7,7 +7,7 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x  -g3 -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat -lsnappy  ")
 
 
 
@@ -23,16 +23,12 @@ find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 find_library( AVCODEC_LIBRARY
-  NAMES avcodec
+  NAMES x264
   HINTS
   PATH_SUFFIXES lib64 lib
   PATHS
-  /usr/local
-  /usr
-  /sw
+  /usr/
   /opt/local
-  /opt/csw
-  /opt
 )
 message("Avcodec is ${AVCODEC_LIBRARY}")
 
