@@ -21,6 +21,9 @@ class ScreenRecieverX264 : public ScreenReciever
 
       int width;
       int height;
+
+      int forcedFrames;
+      int forceMono;
       boost::shared_ptr<MessageQueue> myQueue;
 
       boost::shared_ptr<ImageManager> manager;

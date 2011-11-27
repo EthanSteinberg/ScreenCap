@@ -13,10 +13,8 @@ extern "C"
 #include <x264.h>
 #include <libswscale/swscale.h>
 }
-#include <CImg.h>
 #include <cstdlib>
 
-using namespace cimg_library;
 
 boost::shared_ptr<ScreenReciever> ScreenReciever::create()
 {
@@ -25,12 +23,15 @@ boost::shared_ptr<ScreenReciever> ScreenReciever::create()
 
 ScreenRecieverX264::ScreenRecieverX264()
 {
+   forcedFrames = 0;
+   forceMono = 0;
 }
 
 
 void ScreenRecieverX264::setImageManager(boost::shared_ptr<ImageManager> theManager)
 {
    manager = theManager;
+   dumperQueue->pushIn(boost::bind(&ScreenDumper::setImageManager,dumper,manager));
 }
 
 void ScreenRecieverX264::setScreenDumper(boost::shared_ptr<ScreenDumper> theDumper)
@@ -48,18 +49,11 @@ void ScreenRecieverX264::setMessageQueue(boost::shared_ptr<MessageQueue> theQueu
    myQueue = theQueue;
 }
 
-void killPicture(ConvertedImage *pic)
-{
-   x264_picture_clean(pic);
-   delete(pic);
-}
-
 void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
 {
-   boost::shared_ptr<ConvertedImage> pic_in(new ConvertedImage, killPicture);
-   x264_picture_alloc(pic_in.get(),X264_CSP_I420, width, height);
+   auto picture = manager->getConvertedImage();
 
-   static int forceMono = 0;
+   x264_picture_t *pic_in = (x264_picture_t*) picture->image;
 
    int curtime = (image->time * 30);
    pic_in->i_pts = forceMono++;
@@ -78,13 +72,14 @@ void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
 
    while (curtime > forceMono -1)
    {
+      forcedFrames++;
       printf("Forced to force a frame\n");
       forceMono++;
       pic_in->i_pts++;
-      dumperQueue->pushIn(boost::bind(&ScreenDumper::dumpImage,dumper,pic_in));
+      dumperQueue->pushIn(boost::bind(&ScreenDumper::dumpImage,dumper,picture));
    }
 
-   dumperQueue->pushIn(boost::bind(&ScreenDumper::dumpImage,dumper,pic_in));
+   dumperQueue->pushIn(boost::bind(&ScreenDumper::dumpImage,dumper,picture));
 
 
 }
@@ -92,6 +87,7 @@ void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
 void ScreenRecieverX264::stopProcess()
 {
    printf("Reciever is told to quit\n");
+   printf(" %d out of %d , or %f%% frames were forced\n",forcedFrames,forceMono,(float) forcedFrames/forceMono * 100);
    dumperQueue->pushIn(boost::bind(&ScreenDumper::finish,dumper));
    myQueue->pushIn(boost::function<void(void)>());
 }

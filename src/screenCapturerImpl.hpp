@@ -8,10 +8,14 @@
 #include "imageManager.hpp"
 #include "clock.hpp"
 
+#define cimg_use_png
+#include <CImg.h>
+
+using namespace cimg_library;
 class ScreenCapturerImpl : public ScreenCapturer
 {
 public:
-   ScreenCapturerImpl();
+   ScreenCapturerImpl(int fps);
    ~ScreenCapturerImpl();
    virtual void setMessageQueue(boost::shared_ptr<MessageQueue> queue);
    virtual void setScreenRecieverQueue(boost::shared_ptr<MessageQueue> queue);
@@ -21,6 +25,7 @@ public:
    virtual void stopCapture();
 
 private:
+   CImg<unsigned char> cursorImage;
    
    Display* display;
    Visual* visual;
@@ -29,6 +34,8 @@ private:
    int width;
    int height;
    XShmSegmentInfo shminfo;
+
+   int fps;
 
    bool first;
    bool stopped;

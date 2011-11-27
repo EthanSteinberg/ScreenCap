@@ -1,25 +1,33 @@
 #ifndef SCREEN_DUMPER_X264_INCLUDED
 #define SCREEN_DUMPER_X264_INCLUDED
 
+#include "screenDumper.hpp"
+
 #include <cstdint>
 extern "C"
 {
 #include <x264.h>
 }
 
-#include "screenDumper.hpp"
 
 class ScreenDumperX264 : public ScreenDumper
 {
 public:
+   ScreenDumperX264(int fps,std::string tmpDir, std::string outFile);
    virtual void setMessageQueue(boost::shared_ptr<MessageQueue>);
    virtual void dumpImage(boost::shared_ptr<ConvertedImage> );
+   virtual void setImageManager(boost::shared_ptr<ImageManager>);
    virtual void setSize(int width, int height);
    virtual void finish();
 
 private:
-   boost::shared_ptr<MessageQueue> myQueue;
+   std::string tmpDir;
+   std::string outFile;
 
+   boost::shared_ptr<MessageQueue> myQueue;
+   boost::shared_ptr<ImageManager> manager;
+
+   int fps;
 
    int width;
    int height;
