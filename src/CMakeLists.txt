@@ -14,6 +14,6 @@ set(SRCS
 )
  
 add_executable(Test ${HDRS} ${SRCS})
-target_link_libraries(Test ${GTK3_LIBRARIES} ${GLEW_LIBRARY} ${OPENGL_LIBRARY} ${AVCODEC_LIBRARY} ${Boost_LIBRARIES})
+target_link_libraries(Test ${AVCODEC_LIBRARY} ${Boost_LIBRARIES})
 
 

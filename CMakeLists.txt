@@ -7,7 +7,7 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat -lsnappy  -lpng")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat -lpng -lX11 -lXext -lXfixes")
 
 
 
@@ -31,15 +31,6 @@ find_library( AVCODEC_LIBRARY
   /opt/local
 )
 message("Avcodec is ${AVCODEC_LIBRARY}")
-
-find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_PATH})
-
-find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_PATH})
-
-find_package(GTK3 3.0 COMPONENTS  gtk gtkmm)
-include_directories(${GTK3_INCLUDE_DIRS})
 
 add_subdirectory(src) 
 
