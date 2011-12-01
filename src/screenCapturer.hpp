@@ -14,7 +14,6 @@ public:
    {}
 
    static boost::shared_ptr<ScreenCapturer> create(boost::shared_ptr<MessageQueue> queue, int fps);
-   virtual void setScreenRecieverQueue(boost::shared_ptr<MessageQueue> queue) = 0;
    virtual void setScreenReciever(boost::shared_ptr<ScreenReciever> reciever) = 0;
    virtual void setImageManager() = 0;
    virtual void captureScreen() = 0;

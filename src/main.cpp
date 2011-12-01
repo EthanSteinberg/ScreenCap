@@ -92,7 +92,6 @@ int main(int argc, char** argv)
 
    screenReciever->setScreenDumper(screenDumper);
    
-   screenCapturer->setScreenRecieverQueue(screenRecieverQueue);
    screenCapturer->setScreenReciever(screenReciever);
    screenCapturer->setImageManager();
 
