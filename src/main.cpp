@@ -84,7 +84,7 @@ int main(int argc, char** argv)
    auto signalHandler = SignalHandler::create();
    auto screenCapturer = ScreenCapturer::create(fps);
    auto screenReciever = ScreenReciever::create();
-   auto screenDumper   = ScreenDumper::create(fps,tmpDir,outFile);
+   auto screenDumper   = ScreenDumper::create(screenDumperQueue,fps,tmpDir,outFile);
 
 
    signalHandler->blockSignals();

@@ -13,7 +13,7 @@ extern "C"
 class ScreenDumperX264 : public ScreenDumper
 {
 public:
-   ScreenDumperX264(int fps,std::string tmpDir, std::string outFile);
+   ScreenDumperX264(boost::shared_ptr<MessageQueue> queue, int fps,std::string tmpDir, std::string outFile);
    virtual void setMessageQueue(boost::shared_ptr<MessageQueue>);
    virtual void dumpImage(boost::shared_ptr<ConvertedImage> );
    virtual void setImageManager(boost::shared_ptr<ImageManager>);

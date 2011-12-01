@@ -2,12 +2,12 @@
 
 #include <boost/make_shared.hpp>
 
-boost::shared_ptr<ScreenDumper> ScreenDumper::create(int fps, std::string aTmpDir, std::string aOutFile)
+boost::shared_ptr<ScreenDumper> ScreenDumper::create(boost::shared_ptr<MessageQueue> queue, int fps, std::string aTmpDir, std::string aOutFile)
 {
-   return boost::make_shared<ScreenDumperX264>(fps,aTmpDir,aOutFile);
+   return boost::make_shared<ScreenDumperX264>(queue,fps,aTmpDir,aOutFile);
 }
 
-ScreenDumperX264::ScreenDumperX264(int aFps, std::string aTmpDir, std::string aOutFile)
+ScreenDumperX264::ScreenDumperX264(boost::shared_ptr<MessageQueue> queue,int aFps, std::string aTmpDir, std::string aOutFile) : ScreenDumper(queue)
 {
    fps = aFps;
    tmpDir = aTmpDir;
