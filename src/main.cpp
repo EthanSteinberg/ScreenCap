@@ -6,12 +6,31 @@
 
 #include <boost/program_options.hpp>
 
+#include "messageQueueUser.hpp"
 
 namespace po = boost::program_options;
+
+class Foo : public MessageQueueUser<Foo>
+{
+public:
+   Foo(boost::shared_ptr<MessageQueue> qu) : MessageQueueUser<Foo>(qu)
+   {}
+
+   void wow()
+   {
+      printf("I cannot even believe this\n");
+   }
+
+};
 
 
 int main(int argc, char** argv)
 {
+   auto fooQueue = MessageQueue::create();
+   Foo fun(fooQueue);
+   fun.pushIn(&Foo::wow);
+   fooQueue->getNextOrWait()();
+
 
    int fps;
    std::string tmpDir;

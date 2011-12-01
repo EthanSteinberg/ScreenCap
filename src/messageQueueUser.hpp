@@ -17,7 +17,7 @@ public:
 
    void pushIn(boost::function<void (T*)> func)
    {
-      myQueue.pushIn(boost::bind(func, static_cast<T*>(this)));
+      myQueue->pushIn(boost::bind(func, static_cast<T*>(this)));
    }
 
 private:
