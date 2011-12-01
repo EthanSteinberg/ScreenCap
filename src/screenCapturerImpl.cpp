@@ -11,12 +11,12 @@
 
 
 
-boost::shared_ptr<ScreenCapturer> ScreenCapturer::create(int fps)
+boost::shared_ptr<ScreenCapturer> ScreenCapturer::create(boost::shared_ptr<MessageQueue> queue,int fps)
 {
-   return boost::make_shared<ScreenCapturerImpl>(fps);
+   return boost::make_shared<ScreenCapturerImpl>(queue,fps);
 }
 
-ScreenCapturerImpl::ScreenCapturerImpl(int aFps)
+ScreenCapturerImpl::ScreenCapturerImpl(boost::shared_ptr<MessageQueue> queue,int aFps) : ScreenCapturer(queue)
 {
    display = XOpenDisplay(NULL);
    root = DefaultRootWindow(display);
@@ -46,28 +46,19 @@ ScreenCapturerImpl::~ScreenCapturerImpl()
 }
 
 
-void ScreenCapturerImpl::setMessageQueue(boost::shared_ptr<MessageQueue> theQueue)
-{
-   queue = theQueue;
-}
-void ScreenCapturerImpl::setScreenRecieverQueue(boost::shared_ptr<MessageQueue> theQueue)
-{
-   recieverQueue = theQueue;
-}
-
 void ScreenCapturerImpl::stopCapture()
 {
-   queue->pushIn(boost::function<void(void)>());
+   kill();
    stopped = true;
    printf("Screen capture stop at %f\n",clock->getSeconds());
-   recieverQueue->pushIn(boost::bind(&ScreenReciever::stopProcess,reciever));
+   reciever->pushIn(&ScreenReciever::stopProcess);
 }
 
 void ScreenCapturerImpl::setImageManager()
 {
    manager = ImageManager::create(width,height);
-   recieverQueue->pushIn(boost::bind(&ScreenReciever::setImageManager,reciever,manager));
-   recieverQueue->pushIn(boost::bind(&ScreenReciever::setSize,reciever,width,height));
+   reciever->pushIn(boost::bind(&ScreenReciever::setImageManager,_1,manager));
+   reciever->pushIn(boost::bind(&ScreenReciever::setSize,_1,width,height));
    
 }
 
@@ -129,10 +120,10 @@ void ScreenCapturerImpl::captureScreen()
    stuff->time = time;
    //printf("I have captured a screen at %f\n",time);
 
-   recieverQueue->pushIn(boost::bind(&ScreenReciever::processScreen,reciever,stuff));
+   reciever->pushIn(boost::bind(&ScreenReciever::processScreen,_1,stuff));
    
    clock->sleepUntilNext(1.0/fps);
-   queue->pushIn(boost::bind(&ScreenCapturer::captureScreen,this));
+   pushIn(&ScreenCapturer::captureScreen);
 }
 
 void ScreenCapturerImpl::setScreenReciever(boost::shared_ptr<ScreenReciever> theReciever)

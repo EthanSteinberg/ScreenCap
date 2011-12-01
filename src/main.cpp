@@ -6,6 +6,8 @@
 
 #include <boost/program_options.hpp>
 
+#include "messageQueueUser.hpp"
+
 namespace po = boost::program_options;
 
 int main(int argc, char** argv)
@@ -59,25 +61,17 @@ int main(int argc, char** argv)
    auto screenRecieverQueue = MessageQueue::create();
    auto screenDumperQueue = MessageQueue::create();
 
-   auto signalHandler = SignalHandler::create();
-   auto screenCapturer = ScreenCapturer::create(fps);
-   auto screenReciever = ScreenReciever::create();
-   auto screenDumper   = ScreenDumper::create(fps,tmpDir,outFile);
+   auto signalHandler = SignalHandler::create(signalHandlerQueue);
+   auto screenCapturer = ScreenCapturer::create(screenCapturerQueue,fps);
+   auto screenReciever = ScreenReciever::create(screenRecieverQueue);
+   auto screenDumper   = ScreenDumper::create(screenDumperQueue,fps,tmpDir,outFile);
 
 
    signalHandler->blockSignals();
-   signalHandler->setMessageQueue(signalHandlerQueue);
    signalHandler->setScreenCapturer(screenCapturer);
-   signalHandler->setScreenCapturerQueue(screenCapturerQueue);
 
-   screenDumper->setMessageQueue(screenDumperQueue);   
-
-   screenReciever->setMessageQueue(screenRecieverQueue);
-   screenReciever->setScreenDumperQueue(screenDumperQueue);
    screenReciever->setScreenDumper(screenDumper);
    
-   screenCapturer->setMessageQueue(screenCapturerQueue);
-   screenCapturer->setScreenRecieverQueue(screenRecieverQueue);
    screenCapturer->setScreenReciever(screenReciever);
    screenCapturer->setImageManager();
 
@@ -86,9 +80,9 @@ int main(int argc, char** argv)
    boost::thread recieverThread = ThreadRunner::createThread(screenRecieverQueue);
    boost::thread dumperThread = ThreadRunner::createThread(screenDumperQueue);
 
-   signalHandlerQueue->pushIn(boost::bind(&SignalHandler::handleSignal,signalHandler));
+   signalHandler->pushIn(&SignalHandler::handleSignal);
 
-   screenCapturerQueue->pushIn(boost::bind(&ScreenCapturer::captureScreen,screenCapturer));
+   screenCapturer->pushIn(&ScreenCapturer::captureScreen);
    
 
    capturerThread.join();

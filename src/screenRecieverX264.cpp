@@ -16,12 +16,12 @@ extern "C"
 #include <cstdlib>
 
 
-boost::shared_ptr<ScreenReciever> ScreenReciever::create()
+boost::shared_ptr<ScreenReciever> ScreenReciever::create(boost::shared_ptr<MessageQueue> queue)
 {
-   return boost::make_shared<ScreenRecieverX264>();
+   return boost::make_shared<ScreenRecieverX264>(queue);
 }
 
-ScreenRecieverX264::ScreenRecieverX264()
+ScreenRecieverX264::ScreenRecieverX264(boost::shared_ptr<MessageQueue> queue) : ScreenReciever(queue)
 {
    forcedFrames = 0;
    forceMono = 0;
@@ -31,7 +31,7 @@ ScreenRecieverX264::ScreenRecieverX264()
 void ScreenRecieverX264::setImageManager(boost::shared_ptr<ImageManager> theManager)
 {
    manager = theManager;
-   dumperQueue->pushIn(boost::bind(&ScreenDumper::setImageManager,dumper,manager));
+   dumper->pushIn(boost::bind(&ScreenDumper::setImageManager,_1,manager));
 }
 
 void ScreenRecieverX264::setScreenDumper(boost::shared_ptr<ScreenDumper> theDumper)
@@ -39,15 +39,7 @@ void ScreenRecieverX264::setScreenDumper(boost::shared_ptr<ScreenDumper> theDump
    dumper = theDumper;
 }
 
-void ScreenRecieverX264::setScreenDumperQueue(boost::shared_ptr<MessageQueue> theQueue)
-{
-   dumperQueue = theQueue;
-}
 
-void ScreenRecieverX264::setMessageQueue(boost::shared_ptr<MessageQueue> theQueue)
-{
-   myQueue = theQueue;
-}
 
 void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
 {
@@ -76,10 +68,10 @@ void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
       printf("Forced to force a frame\n");
       forceMono++;
       pic_in->i_pts++;
-      dumperQueue->pushIn(boost::bind(&ScreenDumper::dumpImage,dumper,picture));
+      dumper->pushIn(boost::bind(&ScreenDumper::dumpImage,_1, picture));
    }
 
-   dumperQueue->pushIn(boost::bind(&ScreenDumper::dumpImage,dumper,picture));
+   dumper->pushIn(boost::bind(&ScreenDumper::dumpImage,_1, picture));
 
 
 }
@@ -88,8 +80,8 @@ void ScreenRecieverX264::stopProcess()
 {
    printf("Reciever is told to quit\n");
    printf(" %d out of %d , or %f%% frames were forced\n",forcedFrames,forceMono,(float) forcedFrames/forceMono * 100);
-   dumperQueue->pushIn(boost::bind(&ScreenDumper::finish,dumper));
-   myQueue->pushIn(boost::function<void(void)>());
+   dumper->pushIn(&ScreenDumper::finish);
+   kill();
 }
 
 void ScreenRecieverX264::setSize(int Width, int Height)
@@ -97,7 +89,7 @@ void ScreenRecieverX264::setSize(int Width, int Height)
    width = Width;
    height = Height;
 
-   dumperQueue->pushIn(boost::bind(&ScreenDumper::setSize,dumper,width,height));
+   dumper->pushIn(boost::bind(&ScreenDumper::setSize,_1,width,height));
 
 }
 

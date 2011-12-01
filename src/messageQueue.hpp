@@ -8,8 +8,8 @@ class MessageQueue
 {
 public:
    static boost::shared_ptr<MessageQueue> create();
-   virtual boost::function< void(void)> getNextOrWait() = 0;
-   virtual void pushIn(boost::function< void(void)> func) = 0;
+   virtual boost::function< void()> getNextOrWait() = 0;
+   virtual void pushIn(boost::function< void()> func) = 0;
 
 protected:
    ~MessageQueue(){}
