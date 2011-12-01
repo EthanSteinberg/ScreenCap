@@ -5,11 +5,15 @@
 #include "messageQueue.hpp"
 #include "screenReciever.hpp"
 
-class ScreenCapturer
+#include "messageQueueUser.hpp"
+
+class ScreenCapturer : public MessageQueueUser<ScreenCapturer>
 {
 public:
-   static boost::shared_ptr<ScreenCapturer> create(int fps);
-   virtual void setMessageQueue(boost::shared_ptr<MessageQueue> queue) = 0;
+   ScreenCapturer(boost::shared_ptr<MessageQueue> queue) : MessageQueueUser<ScreenCapturer>(queue)
+   {}
+
+   static boost::shared_ptr<ScreenCapturer> create(boost::shared_ptr<MessageQueue> queue, int fps);
    virtual void setScreenRecieverQueue(boost::shared_ptr<MessageQueue> queue) = 0;
    virtual void setScreenReciever(boost::shared_ptr<ScreenReciever> reciever) = 0;
    virtual void setImageManager() = 0;
