@@ -10,7 +10,7 @@
 class ScreenCapturer : public MessageQueueUser<ScreenCapturer>
 {
 public:
-   ScreenCapturer(boost::shared_ptr<MessageQueue> queue) : MessageQueueUser<ScreenCapturer>(queue)
+   ScreenCapturer(boost::shared_ptr<MessageQueue> queue) : MessageQueueUser(queue)
    {}
 
    static boost::shared_ptr<ScreenCapturer> create(boost::shared_ptr<MessageQueue> queue, int fps);

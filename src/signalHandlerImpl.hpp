@@ -7,19 +7,15 @@
 class SignalHandlerImpl : public SignalHandler
 {
 public:
-   SignalHandlerImpl();
+   SignalHandlerImpl(boost::shared_ptr<MessageQueue> queue);
    virtual void blockSignals();
-   virtual void setMessageQueue(boost::shared_ptr<MessageQueue>);
    virtual void handleSignal();
 
    virtual void setScreenCapturer( boost::shared_ptr<ScreenCapturer>);
-   virtual void setScreenCapturerQueue(boost::shared_ptr<MessageQueue>);
 protected:
-   boost::shared_ptr<MessageQueue> myQueue;
    sigset_t set;
 
    boost::shared_ptr<ScreenCapturer> capturer;
-   boost::shared_ptr<MessageQueue> capturerQueue;
 
    bool stoppedCapturer;
 };

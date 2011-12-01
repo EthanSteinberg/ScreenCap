@@ -3,12 +3,12 @@
 #include <boost/make_shared.hpp>
 
 #include <boost/bind.hpp>
-boost::shared_ptr<SignalHandler> SignalHandler::create()
+boost::shared_ptr<SignalHandler> SignalHandler::create(boost::shared_ptr<MessageQueue> queue)
 {
-   return boost::make_shared<SignalHandlerImpl>();
+   return boost::make_shared<SignalHandlerImpl>(queue);
 }
 
-SignalHandlerImpl::SignalHandlerImpl()
+SignalHandlerImpl::SignalHandlerImpl(boost::shared_ptr<MessageQueue> queue) : SignalHandler(queue)
 {
    sigemptyset(&set);
    sigaddset(&set,SIGINT);
@@ -24,16 +24,6 @@ void SignalHandlerImpl::blockSignals()
       perror("pthread_sigmask error");
       exit(1);
    }
-}
-
-void SignalHandlerImpl::setMessageQueue(boost::shared_ptr<MessageQueue> theQueue)
-{
-   myQueue = theQueue;
-}
-
-void SignalHandlerImpl::setScreenCapturerQueue(boost::shared_ptr<MessageQueue> theQueue)
-{
-   capturerQueue = theQueue;
 }
 
 void SignalHandlerImpl::setScreenCapturer(boost::shared_ptr<ScreenCapturer> theCapturer)
@@ -60,7 +50,7 @@ void SignalHandlerImpl::handleSignal()
          printf("I have been cntr-c ed\n");
          if (!stoppedCapturer)
          {
-            capturerQueue->pushIn(boost::bind(&ScreenCapturer::stopCapture,capturer));
+            capturer->pushIn(&ScreenCapturer::stopCapture);
             stoppedCapturer = true;
          }
          else
@@ -74,6 +64,6 @@ void SignalHandlerImpl::handleSignal()
          exit(1);
    };
 
-   myQueue->pushIn(boost::bind(&SignalHandler::handleSignal,this));
+   pushIn(&SignalHandler::handleSignal);
 }
 

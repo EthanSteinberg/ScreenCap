@@ -81,16 +81,14 @@ int main(int argc, char** argv)
    auto screenRecieverQueue = MessageQueue::create();
    auto screenDumperQueue = MessageQueue::create();
 
-   auto signalHandler = SignalHandler::create();
+   auto signalHandler = SignalHandler::create(signalHandlerQueue);
    auto screenCapturer = ScreenCapturer::create(screenCapturerQueue,fps);
    auto screenReciever = ScreenReciever::create();
    auto screenDumper   = ScreenDumper::create(screenDumperQueue,fps,tmpDir,outFile);
 
 
    signalHandler->blockSignals();
-   signalHandler->setMessageQueue(signalHandlerQueue);
    signalHandler->setScreenCapturer(screenCapturer);
-   signalHandler->setScreenCapturerQueue(screenCapturerQueue);
 
    screenReciever->setMessageQueue(screenRecieverQueue);
    screenReciever->setScreenDumperQueue(screenDumperQueue);

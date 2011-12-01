@@ -14,7 +14,7 @@
 class ScreenDumper : public MessageQueueUser<ScreenDumper>
 {
 public:
-   ScreenDumper(boost::shared_ptr<MessageQueue> queue) : MessageQueueUser<ScreenDumper>(queue)
+   ScreenDumper(boost::shared_ptr<MessageQueue> queue) : MessageQueueUser(queue)
    {}
 
    static boost::shared_ptr<ScreenDumper> create(boost::shared_ptr<MessageQueue>, int fps,std::string tmpDir, std::string outFile);
