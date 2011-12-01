@@ -14,12 +14,6 @@ ScreenDumperX264::ScreenDumperX264(boost::shared_ptr<MessageQueue> queue,int aFp
    outFile = aOutFile;
 }
 
-
-void ScreenDumperX264::setMessageQueue(boost::shared_ptr<MessageQueue> queue)
-{
-   myQueue = queue;
-}
-
 void ScreenDumperX264::setImageManager(boost::shared_ptr<ImageManager> theManager)
 {
    manager = theManager;
@@ -144,5 +138,5 @@ void ScreenDumperX264::finish()
    dup2(sot,1);
    dup2(ser,2);
 
-   myQueue->pushIn(boost::function<void(void)>());
+   kill();
 }

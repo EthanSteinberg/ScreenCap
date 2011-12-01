@@ -14,7 +14,6 @@ class ScreenDumperX264 : public ScreenDumper
 {
 public:
    ScreenDumperX264(boost::shared_ptr<MessageQueue> queue, int fps,std::string tmpDir, std::string outFile);
-   virtual void setMessageQueue(boost::shared_ptr<MessageQueue>);
    virtual void dumpImage(boost::shared_ptr<ConvertedImage> );
    virtual void setImageManager(boost::shared_ptr<ImageManager>);
    virtual void setSize(int width, int height);
@@ -24,7 +23,6 @@ private:
    std::string tmpDir;
    std::string outFile;
 
-   boost::shared_ptr<MessageQueue> myQueue;
    boost::shared_ptr<ImageManager> manager;
 
    int fps;

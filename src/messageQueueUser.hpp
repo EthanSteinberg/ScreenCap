@@ -20,6 +20,11 @@ public:
       myQueue->pushIn(boost::bind(func, static_cast<T*>(this)));
    }
 
+   void kill()
+   {
+      myQueue->pushIn(boost::function<void()>());
+   }
+
 private:
    const boost::shared_ptr<MessageQueue> myQueue;
 };
