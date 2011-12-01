@@ -7,7 +7,7 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat -lsnappy  ")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat -lsnappy  -lpng")
 
 
 
