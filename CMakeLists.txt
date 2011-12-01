@@ -7,7 +7,9 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -march=native -std=c++0x  -g -O0 -Wshadow")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x  -g3 -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat")
+
+
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")	
 
@@ -20,8 +22,29 @@ set(BOOST_COMPONENTS system thread date_time)
 find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
-find_package(SFML REQUIRED)
-include_directories(${SFML_INCLUDE_DIR})
+find_library( AVCODEC_LIBRARY
+  NAMES avcodec
+  HINTS
+  PATH_SUFFIXES lib64 lib
+  PATHS
+  /usr/local
+  /usr
+  /sw
+  /opt/local
+  /opt/csw
+  /opt
+)
+message("Avcodec is ${AVCODEC_LIBRARY}")
+
+find_package(GLEW REQUIRED)
+include_directories(${GLEW_INCLUDE_PATH})
+
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_PATH})
+
+find_package(GTK3 3.0 COMPONENTS  gtk gtkmm)
+include_directories(${GTK3_INCLUDE_DIRS})
 
 add_subdirectory(src) 
+
 
