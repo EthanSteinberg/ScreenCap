@@ -10,28 +10,8 @@
 
 namespace po = boost::program_options;
 
-class Foo : public MessageQueueUser<Foo>
-{
-public:
-   Foo(boost::shared_ptr<MessageQueue> qu) : MessageQueueUser<Foo>(qu)
-   {}
-
-   void wow()
-   {
-      printf("I cannot even believe this\n");
-   }
-
-};
-
-
 int main(int argc, char** argv)
 {
-   auto fooQueue = MessageQueue::create();
-   Foo fun(fooQueue);
-   fun.pushIn(&Foo::wow);
-   fooQueue->getNextOrWait()();
-
-
    int fps;
    std::string tmpDir;
    std::string outFile;
@@ -100,9 +80,9 @@ int main(int argc, char** argv)
    boost::thread recieverThread = ThreadRunner::createThread(screenRecieverQueue);
    boost::thread dumperThread = ThreadRunner::createThread(screenDumperQueue);
 
-   signalHandlerQueue->pushIn(boost::bind(&SignalHandler::handleSignal,signalHandler));
+   signalHandler->pushIn(&SignalHandler::handleSignal);
 
-   screenCapturerQueue->pushIn(boost::bind(&ScreenCapturer::captureScreen,screenCapturer));
+   screenCapturer->pushIn(&ScreenCapturer::captureScreen);
    
 
    capturerThread.join();
