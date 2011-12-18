@@ -20,8 +20,8 @@ class ImageManager
 {
 public:
    static boost::shared_ptr<ImageManager> create(int width, int height);
+   
    virtual boost::shared_ptr<ImageType> getImage() = 0;
-
    virtual boost::shared_ptr<ConvertedImage> getConvertedImage() =0;
 
 protected:
