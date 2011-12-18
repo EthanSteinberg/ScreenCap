@@ -12,7 +12,7 @@ const int numOfConvertedImages = 5;
 
 class ImageManagerComplex : public ImageManager
 {
-   public:    
+public:
 
    ImageManagerComplex(int width, int height);
    ~ImageManagerComplex();
@@ -20,7 +20,7 @@ class ImageManagerComplex : public ImageManager
    virtual boost::shared_ptr<ImageType> getImage();
    virtual boost::shared_ptr<ConvertedImage> getConvertedImage() ;
 
-   private:
+private:
    void disposeImage(int id);
    void disposeConvertedImage(int id);
 
