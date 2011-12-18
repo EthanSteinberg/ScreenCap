@@ -19,11 +19,20 @@ boost::shared_ptr<ImageManager> ImageManager::create(int width, int height)
    return boost::make_shared<ImageManagerComplex>(width,height);
 }
 
-void killPicture(ConvertedImage *pic)
+void killPicture(ConvertedImage *data)
 {
-   x264_picture_clean((x264_picture_t*) pic->image);
+   x264_picture_t *pic = (x264_picture_t *) data;
+
+   x264_picture_clean(pic);
    delete(pic);
 }
+
+void killSharedMemory(ImageType *image)
+{
+   shmdt(image->shmaddr);
+   shmctl(image->shmid, IPC_RMID,0);
+}
+
 
 
 ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), height(Height), size(width *height * 4)
@@ -35,14 +44,13 @@ ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), 
    imageFd = eventfd(numOfImages, EFD_SEMAPHORE);
    imageUsed = numOfImages;
 
-   for (int i = 0; i < numOfImages;i++)
+   for (int i = 0; i < numOfImages; i++)
    {
       StoredImage storage;
 
-      storage.image = boost::make_shared<ImageType>();
+      storage.image = boost::shared_ptr<ImageType>(new ImageType(),killSharedMemory);
       storage.image->shmid = shmget(IPC_PRIVATE , width * height * 4, IPC_CREAT | 0777);
       storage.image->shmaddr = (unsigned char *) shmat(storage.image->shmid,0,0);
-      storage.image->id = i;
       storage.isUsed = false;
 
       storedImages.push_back(storage);
@@ -51,36 +59,28 @@ ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), 
    convertedImageFd = eventfd(numOfConvertedImages, EFD_SEMAPHORE);
    convertedImageUsed = numOfConvertedImages;
 
-   for (int i = 0; i < numOfConvertedImages;i++)
+   for (int i = 0; i < numOfConvertedImages; i++)
    {
       StoredConvertedImage storage;
 
-      storage.image = boost::shared_ptr<ConvertedImage>(new ConvertedImage, killPicture); 
-      x264_picture_t* pic = new x264_picture_t();
-      x264_picture_alloc(pic,X264_CSP_I420, width, height);
 
-      storage.image->image = pic;
-      storage.image->id = i;
+      boost::shared_ptr<ConvertedImage> pic = boost::shared_ptr<ConvertedImage>((ConvertedImage *)new x264_picture_t, killPicture);
+      x264_picture_alloc((x264_picture_t *)pic.get(),X264_CSP_I420, width, height);
+
+      storage.image= pic;
       storage.isUsed = false;
 
       storedConvertedImages.push_back(storage);
    }
-       
-}
 
-ImageManagerComplex::~ImageManagerComplex()
-{
-   for (int i = 0; i < numOfImages;i++)
-   {
-      shmdt(storedImages[i].image->shmaddr);
-      shmctl(storedImages[i].image->shmid, IPC_RMID,0);
-   }
 }
 
 boost::shared_ptr<ImageType> ImageManagerComplex::getImage()
 {
    if (imageUsed == 0)
+   {
       printf("I am stalling on get image\n");
+   }
 
    uint64_t val;
    read(imageFd,&val,sizeof(val));
@@ -89,12 +89,13 @@ boost::shared_ptr<ImageType> ImageManagerComplex::getImage()
       imageUsed--;
       boost::lock_guard<boost::mutex> lock(imageMutex);
 
-      for (int i = 0; i < numOfImages;i ++)
+      for (int i = 0; i < numOfImages; i ++)
       {
          if (storedImages[i].isUsed == false)
          {
             storedImages[i].isUsed = true;
-            return storedImages[i].image;
+            return boost::shared_ptr<ImageType>(storedImages[i].image.get(),
+                                                boost::bind(&ImageManagerComplex::disposeImage,this,i));
          }
       }
 
@@ -103,12 +104,13 @@ boost::shared_ptr<ImageType> ImageManagerComplex::getImage()
    exit(1); // I should never get here
 }
 
-void ImageManagerComplex::disposeImage(boost::shared_ptr<ImageType> image)
+
+void ImageManagerComplex::disposeImage(int id)
 {
    {
       boost::lock_guard<boost::mutex> lock(imageMutex);
       imageUsed++;
-      storedImages[image->id].isUsed = false;
+      storedImages[id].isUsed = false;
    }
    uint64_t val = 1;
    write(imageFd,&val,sizeof(val));
@@ -117,7 +119,9 @@ void ImageManagerComplex::disposeImage(boost::shared_ptr<ImageType> image)
 boost::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
 {
    if (convertedImageUsed == 0)
+   {
       printf("I am stalling on get converted image\n");
+   }
 
    uint64_t val;
    read(convertedImageFd,&val,sizeof(val));
@@ -126,12 +130,14 @@ boost::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
       convertedImageUsed--;
       boost::lock_guard<boost::mutex> lock(convertedImageMutex);
 
-      for (int i = 0; i < numOfImages;i ++)
+      for (int i = 0; i < numOfImages; i ++)
       {
          if (storedConvertedImages[i].isUsed == false)
          {
             storedConvertedImages[i].isUsed = true;
-            return storedConvertedImages[i].image;
+
+            return boost::shared_ptr<ConvertedImage>(storedConvertedImages[i].image.get(),
+                   boost::bind(&ImageManagerComplex::disposeConvertedImage,this,i));
          }
       }
 
@@ -140,13 +146,17 @@ boost::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
    exit(1); // I should never get here
 }
 
-void ImageManagerComplex::disposeConvertedImage(boost::shared_ptr<ConvertedImage> image)
+
+void ImageManagerComplex::disposeConvertedImage(int id)
 {
    {
       boost::lock_guard<boost::mutex> lock(convertedImageMutex);
       convertedImageUsed++;
-      storedConvertedImages[image->id].isUsed = false;
+      storedConvertedImages[id].isUsed = false;
    }
    uint64_t val = 1;
    write(convertedImageFd,&val,sizeof(val));
 }
+
+ImageManagerComplex::~ImageManagerComplex()
+{}

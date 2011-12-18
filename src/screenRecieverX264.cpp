@@ -45,7 +45,7 @@ void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
 {
    auto picture = manager->getConvertedImage();
 
-   x264_picture_t *pic_in = (x264_picture_t*) picture->image;
+   x264_picture_t *pic_in = (x264_picture_t*) picture.get();
 
    int curtime = (image->time * 30);
    pic_in->i_pts = forceMono++;
@@ -59,7 +59,6 @@ void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
    unsigned char* data = image->shmaddr;
    int stride = width * 4;
    sws_scale(convertCtx, &data,&stride, 0, height, pic_in->img.plane, pic_in->img.i_stride);
-   manager->disposeImage(image);
    //printf("I have processed a screen\n");
 
    while (curtime > forceMono -1)

@@ -5,9 +5,8 @@ project(GLFont)
 if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
    message(FATAL_ERROR "ERROR: Building in source, please build out of it")
 endif()
-
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -std=c++0x -Wextra -lswscale -lavformat -lpng -lX11 -lXext -lXfixes")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -Wextra -lswscale -lavformat -lpng -lX11 -lXext -lXfixes -lrt -lpthread")
 
 
 
