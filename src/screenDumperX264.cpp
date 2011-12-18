@@ -3,6 +3,9 @@
 #include <boost/make_shared.hpp>
 #include <boost/scoped_array.hpp>
 
+struct ConvertedImage : public x264_picture_t
+{};
+
 boost::shared_ptr<ScreenDumper> ScreenDumper::create(boost::shared_ptr<MessageQueue> queue, int fps, std::string aTmpDir, std::string aOutFile)
 {
    return boost::make_shared<ScreenDumperX264>(queue,fps,aTmpDir,aOutFile);
@@ -26,7 +29,7 @@ void ScreenDumperX264::dumpImage(boost::shared_ptr<ConvertedImage> image)
 
    x264_nal_t *nals;
    int i_nals;
-   x264_picture_t* in = (x264_picture_t*) image.get();
+   x264_picture_t* in = image.get();
 
 
 

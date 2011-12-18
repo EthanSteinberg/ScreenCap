@@ -15,6 +15,9 @@ extern "C"
 }
 #include <cstdlib>
 
+struct ConvertedImage : public x264_picture_t
+{};
+
 
 boost::shared_ptr<ScreenReciever> ScreenReciever::create(boost::shared_ptr<MessageQueue> queue)
 {
@@ -45,7 +48,7 @@ void ScreenRecieverX264::processScreen(boost::shared_ptr<ImageType> image)
 {
    auto picture = manager->getConvertedImage();
 
-   x264_picture_t *pic_in = (x264_picture_t*) picture.get();
+   x264_picture_t *pic_in = picture.get();
 
    int curtime = (image->time * 30);
    pic_in->i_pts = forceMono++;

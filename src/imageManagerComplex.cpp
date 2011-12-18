@@ -13,16 +13,17 @@ extern "C"
 #include <x264.h>
 }
 
+struct ConvertedImage : public x264_picture_t
+{};
+
 
 boost::shared_ptr<ImageManager> ImageManager::create(int width, int height)
 {
    return boost::make_shared<ImageManagerComplex>(width,height);
 }
 
-void killPicture(ConvertedImage *data)
+void killPicture(ConvertedImage *pic)
 {
-   x264_picture_t *pic = (x264_picture_t *) data;
-
    x264_picture_clean(pic);
    delete(pic);
 }
@@ -64,8 +65,8 @@ ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), 
       StoredConvertedImage storage;
 
 
-      boost::shared_ptr<ConvertedImage> pic = boost::shared_ptr<ConvertedImage>((ConvertedImage *)new x264_picture_t, killPicture);
-      x264_picture_alloc((x264_picture_t *)pic.get(),X264_CSP_I420, width, height);
+      boost::shared_ptr<ConvertedImage> pic = boost::shared_ptr<ConvertedImage>(new ConvertedImage(), killPicture);
+      x264_picture_alloc(pic.get(),X264_CSP_I420, width, height);
 
       storage.image= pic;
       storage.isUsed = false;
