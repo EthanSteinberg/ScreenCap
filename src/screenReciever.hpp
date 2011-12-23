@@ -4,11 +4,11 @@
 #include <boost/shared_ptr.hpp>
 
 #include "imageManager.hpp"
-//#include <CImg.h>
 #include "screenDumper.hpp"
 #include "messageQueue.hpp"
 
 #include "messageQueueUser.hpp"
+#include "configurationManager.hpp"
 
 class ScreenReciever : public MessageQueueUser<ScreenReciever>
 {
@@ -16,7 +16,7 @@ public:
    ScreenReciever(boost::shared_ptr<MessageQueue> queue) : MessageQueueUser(queue)
    {}
 
-   static boost::shared_ptr<ScreenReciever> create(boost::shared_ptr<MessageQueue> queue);
+   static boost::shared_ptr<ScreenReciever> create(boost::shared_ptr<MessageQueue> queue,boost::shared_ptr<ConfigurationManager>);
 
    virtual void setImageManager(boost::shared_ptr<ImageManager> manager) = 0;
    virtual void processScreen( boost::shared_ptr<ImageType> ) = 0;

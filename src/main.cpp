@@ -3,6 +3,7 @@
 #include "screenCapturer.hpp"
 #include "screenReciever.hpp"
 #include "signalHandler.hpp"
+#include "configurationManager.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -12,10 +13,6 @@ namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
-   int fps;
-   std::string tmpDir;
-   std::string outFile;
-
    po::positional_options_description p;
    p.add("output-file",1);
 
@@ -24,7 +21,7 @@ int main(int argc, char** argv)
 
    po::options_description internal;
    internal.add_options()
-   ("output-file",po::value<std::string>(&outFile)->default_value("out.mkv"),"set output location");
+   ("output-file",po::value<std::string>()->default_value("out.mkv"),"set output location");
 
    po::options_description gen("General options");
    gen.add_options()
@@ -32,11 +29,11 @@ int main(int argc, char** argv)
 
    po::options_description video("Video output options");
    video.add_options()
-   ("fps", po::value<int>(&fps)->default_value(30), "Video fps, needs to be an integer");
+   ("fps", po::value<int>()->default_value(30), "Video fps, needs to be an integer");
 
    po::options_description other("Other options");
    other.add_options()
-   ("temp-dir",po::value<std::string>(&tmpDir)->default_value("/tmp"),"Location to store temporary files");
+   ("temp-dir",po::value<std::string>()->default_value("/tmp"),"Location to store temporary files");
 
    desc.add(gen);
    desc.add(video);
@@ -52,8 +49,11 @@ int main(int argc, char** argv)
       return 1;
    }
 
+   auto configuration = ConfigurationManager::create();
 
-   
+   configuration->setOption<int>("fps",vm["fps"].as<int>());
+   configuration->setOption<std::string>("tmpDir",vm["temp-dir"].as<std::string>());
+   configuration->setOption<std::string>("outFile",vm["output-file"].as<std::string>());
 
 
    auto signalHandlerQueue = MessageQueue::create();
@@ -62,9 +62,9 @@ int main(int argc, char** argv)
    auto screenDumperQueue = MessageQueue::create();
 
    auto signalHandler = SignalHandler::create(signalHandlerQueue);
-   auto screenCapturer = ScreenCapturer::create(screenCapturerQueue,fps);
-   auto screenReciever = ScreenReciever::create(screenRecieverQueue);
-   auto screenDumper   = ScreenDumper::create(screenDumperQueue,fps,tmpDir,outFile);
+   auto screenCapturer = ScreenCapturer::create(screenCapturerQueue,configuration);
+   auto screenReciever = ScreenReciever::create(screenRecieverQueue,configuration);
+   auto screenDumper   = ScreenDumper::create(screenDumperQueue,configuration);
 
 
    signalHandler->blockSignals();

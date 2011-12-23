@@ -3,6 +3,7 @@ set(HDRS
  
 set(SRCS
       main.cpp
+      configurationManagerImpl.cpp
       messageQueueLocked.cpp
       threadRunnerSimple.cpp
       screenCapturerImpl.cpp

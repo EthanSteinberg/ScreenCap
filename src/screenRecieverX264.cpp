@@ -19,7 +19,7 @@ struct ConvertedImage : public x264_picture_t
 {};
 
 
-boost::shared_ptr<ScreenReciever> ScreenReciever::create(boost::shared_ptr<MessageQueue> queue)
+boost::shared_ptr<ScreenReciever> ScreenReciever::create(boost::shared_ptr<MessageQueue> queue,boost::shared_ptr<ConfigurationManager>)
 {
    return boost::make_shared<ScreenRecieverX264>(queue);
 }

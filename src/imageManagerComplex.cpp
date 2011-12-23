@@ -12,16 +12,12 @@ extern "C"
 {
 #include <x264.h>
 }
-
 struct ConvertedImage : public x264_picture_t
-{};
+   {};
 
 
-boost::shared_ptr<ImageManager> ImageManager::create(int width, int height)
+namespace
 {
-   return boost::make_shared<ImageManagerComplex>(width,height);
-}
-
 void killPicture(ConvertedImage *pic)
 {
    x264_picture_clean(pic);
@@ -33,6 +29,15 @@ void killSharedMemory(ImageType *image)
    shmdt(image->shmaddr);
    shmctl(image->shmid, IPC_RMID,0);
 }
+}
+
+
+
+boost::shared_ptr<ImageManager> ImageManager::create(int width, int height)
+{
+   return boost::make_shared<ImageManagerComplex>(width,height);
+}
+
 
 
 

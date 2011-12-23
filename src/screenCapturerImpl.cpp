@@ -11,12 +11,12 @@
 
 
 
-boost::shared_ptr<ScreenCapturer> ScreenCapturer::create(boost::shared_ptr<MessageQueue> queue,int fps)
+boost::shared_ptr<ScreenCapturer> ScreenCapturer::create(boost::shared_ptr<MessageQueue> queue,boost::shared_ptr<ConfigurationManager> config)
 {
-   return boost::make_shared<ScreenCapturerImpl>(queue,fps);
+   return boost::make_shared<ScreenCapturerImpl>(queue,config);
 }
 
-ScreenCapturerImpl::ScreenCapturerImpl(boost::shared_ptr<MessageQueue> queue,int aFps) : ScreenCapturer(queue)
+ScreenCapturerImpl::ScreenCapturerImpl(boost::shared_ptr<MessageQueue> queue,boost::shared_ptr<ConfigurationManager> config) : ScreenCapturer(queue)
 {
    display = XOpenDisplay(NULL);
    root = DefaultRootWindow(display);
@@ -36,7 +36,7 @@ ScreenCapturerImpl::ScreenCapturerImpl(boost::shared_ptr<MessageQueue> queue,int
    stopped = false;
    clock = Clock::create();
 
-   fps = aFps;
+   fps = config->getOption<int>("fps");
 
    cursorImage.load_png("../res/arrow.png");
 }
