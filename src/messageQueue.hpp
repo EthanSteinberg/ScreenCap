@@ -1,18 +1,18 @@
 #ifndef QUEUE_H_INCLUDED
 #define QUEUE_H_INCLUDED
 
-#include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
+#include <functional>
+#include <memory>
 
 class MessageQueue
 {
 public:
-   static boost::shared_ptr<MessageQueue> create();
-   virtual boost::function< void()> getNextOrWait() = 0;
-   virtual void pushIn(boost::function< void()> func) = 0;
+   static std::unique_ptr<MessageQueue> create();
+   virtual std::function< void()> getNextOrWait() = 0;
+   virtual void pushIn(std::function< void()> func) = 0;
 
-protected:
-   ~MessageQueue(){}
+   virtual ~MessageQueue()
+   {}
 
 };
 

@@ -1,7 +1,7 @@
 #ifndef SCREEN_RECIEVER_HPP_INCLUDED
 #define SCREEN_RECIEVER_HPP_INCLUDED
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "imageManager.hpp"
 #include "screenDumper.hpp"
@@ -13,19 +13,18 @@
 class ScreenReciever : public MessageQueueUser<ScreenReciever>
 {
 public:
-   ScreenReciever(boost::shared_ptr<MessageQueue> queue) : MessageQueueUser(queue)
+   ScreenReciever(std::shared_ptr<MessageQueue> queue) : MessageQueueUser(queue)
    {}
 
-   static boost::shared_ptr<ScreenReciever> create(boost::shared_ptr<MessageQueue> queue,boost::shared_ptr<ConfigurationManager>);
+   static std::unique_ptr<ScreenReciever> create(std::shared_ptr<MessageQueue> queue,std::shared_ptr<ConfigurationManager>);
 
-   virtual void setImageManager(boost::shared_ptr<ImageManager> manager) = 0;
-   virtual void processScreen( boost::shared_ptr<ImageType> ) = 0;
+   virtual void setImageManager(std::shared_ptr<ImageManager> manager) = 0;
+   virtual void processScreen( std::shared_ptr<ImageType> ) = 0;
    virtual void setSize(int width, int height) = 0;
-   virtual void setScreenDumper(boost::shared_ptr<ScreenDumper> ) = 0;
+   virtual void setScreenDumper(std::shared_ptr<ScreenDumper> ) = 0;
    virtual void stopProcess() = 0;
 
-protected:
-   ~ScreenReciever()
+   virtual ~ScreenReciever()
    {}
 };
 

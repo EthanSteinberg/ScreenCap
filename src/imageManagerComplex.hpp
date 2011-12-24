@@ -3,8 +3,10 @@
 
 #include "imageManager.hpp"
 
+#include <thread>
 
-#include <boost/thread.hpp>
+#include <vector>
+
 
 const int numOfImages = 5;
 const int numOfConvertedImages = 5;
@@ -15,10 +17,10 @@ class ImageManagerComplex : public ImageManager
 public:
 
    ImageManagerComplex(int width, int height);
-   ~ImageManagerComplex();
 
-   virtual boost::shared_ptr<ImageType> getImage();
-   virtual boost::shared_ptr<ConvertedImage> getConvertedImage() ;
+   virtual ~ImageManagerComplex();
+   virtual std::shared_ptr<ImageType> getImage();
+   virtual std::shared_ptr<ConvertedImage> getConvertedImage() ;
 
 private:
    void disposeImage(int id);
@@ -36,21 +38,21 @@ private:
 
    struct StoredImage
    {
-      boost::shared_ptr<ImageType> image;
+      std::shared_ptr<ImageType> image;
       bool isUsed;
    };
 
    struct StoredConvertedImage
    {
-      boost::shared_ptr<ConvertedImage> image;
+      std::shared_ptr<ConvertedImage> image;
       bool isUsed;
    };
 
    std::vector<StoredImage> storedImages;
    std::vector<StoredConvertedImage> storedConvertedImages;
 
-   boost::mutex imageMutex;
-   boost::mutex convertedImageMutex;
+   std::mutex imageMutex;
+   std::mutex convertedImageMutex;
 
 
 };

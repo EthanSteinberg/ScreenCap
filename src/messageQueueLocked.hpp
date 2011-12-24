@@ -4,19 +4,23 @@
 #include "messageQueue.hpp"
 
 #include <queue>
-#include <boost/thread.hpp>
+#include <thread>
+
 
 class MessageQueueLocked :public MessageQueue
 {
 public:
    MessageQueueLocked();
-   virtual boost::function< void(void)> getNextOrWait();
-   virtual void pushIn(boost::function< void(void)> func);
+   virtual ~MessageQueueLocked()
+   {}
+
+   virtual std::function< void(void)> getNextOrWait();
+   virtual void pushIn(std::function< void(void)> func);
 
 private:
    int readfd;
-   std::queue<boost::function<void (void)> > queue;
-   boost::mutex mutex;
+   std::queue<std::function<void (void)> > queue;
+   std::mutex mutex;
 };
 
 

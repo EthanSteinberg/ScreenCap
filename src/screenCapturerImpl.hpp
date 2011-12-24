@@ -15,9 +15,9 @@ using namespace cimg_library;
 class ScreenCapturerImpl : public ScreenCapturer
 {
 public:
-   ScreenCapturerImpl(boost::shared_ptr<MessageQueue> queue, boost::shared_ptr<ConfigurationManager>);
+   ScreenCapturerImpl(std::shared_ptr<MessageQueue> queue, std::shared_ptr<ConfigurationManager>);
    ~ScreenCapturerImpl();
-   virtual void setScreenReciever(boost::shared_ptr<ScreenReciever> reciever);
+   virtual void setScreenReciever(std::shared_ptr<ScreenReciever> reciever);
    virtual void setImageManager();
    virtual void captureScreen();
    virtual void stopCapture();
@@ -39,10 +39,10 @@ private:
    bool stopped;
 
 
-   boost::shared_ptr<ImageManager> manager;
-   boost::shared_ptr<ScreenReciever> reciever;
+   std::shared_ptr<ImageManager> manager;
+   std::shared_ptr<ScreenReciever> reciever;
 
-   boost::shared_ptr<Clock> clock;
+   std::shared_ptr<Clock> clock;
 };
 
 

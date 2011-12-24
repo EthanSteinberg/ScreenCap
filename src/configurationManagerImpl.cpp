@@ -1,9 +1,8 @@
 #include "configurationManagerImpl.hpp"
-#include <boost/make_shared.hpp>
 
-boost::shared_ptr<ConfigurationManager> ConfigurationManager::create()
+std::unique_ptr<ConfigurationManager> ConfigurationManager::create()
 {
-   return boost::make_shared<ConfigurationManagerImpl>();
+   return std::unique_ptr<ConfigurationManagerImpl>(new ConfigurationManagerImpl());
 }
 
 

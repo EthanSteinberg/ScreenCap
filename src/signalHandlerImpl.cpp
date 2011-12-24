@@ -1,14 +1,14 @@
 #include "signalHandlerImpl.hpp"
 
-#include <boost/make_shared.hpp>
 
-#include <boost/bind.hpp>
-boost::shared_ptr<SignalHandler> SignalHandler::create(boost::shared_ptr<MessageQueue> queue)
+
+
+std::unique_ptr<SignalHandler> SignalHandler::create(std::shared_ptr<MessageQueue> queue)
 {
-   return boost::make_shared<SignalHandlerImpl>(queue);
+   return std::unique_ptr<SignalHandlerImpl>(new SignalHandlerImpl(queue));
 }
 
-SignalHandlerImpl::SignalHandlerImpl(boost::shared_ptr<MessageQueue> queue) : SignalHandler(queue)
+SignalHandlerImpl::SignalHandlerImpl(std::shared_ptr<MessageQueue> queue) : SignalHandler(queue)
 {
    sigemptyset(&set);
    sigaddset(&set,SIGINT);
@@ -26,7 +26,7 @@ void SignalHandlerImpl::blockSignals()
    }
 }
 
-void SignalHandlerImpl::setScreenCapturer(boost::shared_ptr<ScreenCapturer> theCapturer)
+void SignalHandlerImpl::setScreenCapturer(std::shared_ptr<ScreenCapturer> theCapturer)
 {
    capturer = theCapturer;
 }

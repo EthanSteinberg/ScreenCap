@@ -7,12 +7,12 @@ class x264_t;
 class ScreenRecieverX264 : public ScreenReciever
 {
    public:
-   ScreenRecieverX264(boost::shared_ptr<MessageQueue> queue);
-   ~ScreenRecieverX264();
+   ScreenRecieverX264(std::shared_ptr<MessageQueue> queue);
+   virtual ~ScreenRecieverX264();
    
-   virtual void setImageManager(boost::shared_ptr<ImageManager> manager);
-   virtual void setScreenDumper(boost::shared_ptr<ScreenDumper> dumper);
-   virtual void processScreen( boost::shared_ptr<ImageType> );
+   virtual void setImageManager(std::shared_ptr<ImageManager> manager);
+   virtual void setScreenDumper(std::shared_ptr<ScreenDumper> dumper);
+   virtual void processScreen( std::shared_ptr<ImageType> );
    virtual void setSize(int width, int height);
    virtual void stopProcess();
 
@@ -24,10 +24,10 @@ class ScreenRecieverX264 : public ScreenReciever
       int forcedFrames;
       int forceMono;
 
-      boost::shared_ptr<ImageManager> manager;
-      boost::shared_ptr<ScreenDumper> dumper;
+      std::shared_ptr<ImageManager> manager;
+      std::shared_ptr<ScreenDumper> dumper;
       
-      boost::shared_ptr<ConvertedImage> lastImage;
+      std::shared_ptr<ConvertedImage> lastImage;
 };
 
 #endif
