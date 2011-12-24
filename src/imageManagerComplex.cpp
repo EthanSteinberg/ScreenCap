@@ -1,6 +1,6 @@
 #include "imageManagerComplex.hpp"
 
-#include <boost/make_shared.hpp>
+
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -31,11 +31,9 @@ void killSharedMemory(ImageType *image)
 }
 }
 
-
-
-boost::shared_ptr<ImageManager> ImageManager::create(int width, int height)
+std::unique_ptr<ImageManager> ImageManager::create(int width, int height)
 {
-   return boost::make_shared<ImageManagerComplex>(width,height);
+   return std::unique_ptr<ImageManagerComplex>(new ImageManagerComplex(width,height));
 }
 
 
@@ -54,7 +52,7 @@ ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), 
    {
       StoredImage storage;
 
-      storage.image = boost::shared_ptr<ImageType>(new ImageType(),killSharedMemory);
+      storage.image = std::shared_ptr<ImageType>(new ImageType(),killSharedMemory);
       storage.image->shmid = shmget(IPC_PRIVATE , width * height * 4, IPC_CREAT | 0777);
       storage.image->shmaddr = (unsigned char *) shmat(storage.image->shmid,0,0);
       storage.isUsed = false;
@@ -70,7 +68,7 @@ ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), 
       StoredConvertedImage storage;
 
 
-      boost::shared_ptr<ConvertedImage> pic = boost::shared_ptr<ConvertedImage>(new ConvertedImage(), killPicture);
+      std::shared_ptr<ConvertedImage> pic = std::shared_ptr<ConvertedImage>(new ConvertedImage(), killPicture);
       x264_picture_alloc(pic.get(),X264_CSP_I420, width, height);
 
       storage.image= pic;
@@ -81,7 +79,7 @@ ImageManagerComplex::ImageManagerComplex(int Width, int Height) : width(Width), 
 
 }
 
-boost::shared_ptr<ImageType> ImageManagerComplex::getImage()
+std::shared_ptr<ImageType> ImageManagerComplex::getImage()
 {
    if (imageUsed == 0)
    {
@@ -93,15 +91,15 @@ boost::shared_ptr<ImageType> ImageManagerComplex::getImage()
 
    {
       imageUsed--;
-      boost::lock_guard<boost::mutex> lock(imageMutex);
+      std::lock_guard<std::mutex> lock(imageMutex);
 
       for (int i = 0; i < numOfImages; i ++)
       {
          if (storedImages[i].isUsed == false)
          {
             storedImages[i].isUsed = true;
-            return boost::shared_ptr<ImageType>(storedImages[i].image.get(),
-                                                boost::bind(&ImageManagerComplex::disposeImage,this,i));
+            return std::shared_ptr<ImageType>(storedImages[i].image.get(),
+                                                std::bind(&ImageManagerComplex::disposeImage,this,i));
          }
       }
 
@@ -114,7 +112,7 @@ boost::shared_ptr<ImageType> ImageManagerComplex::getImage()
 void ImageManagerComplex::disposeImage(int id)
 {
    {
-      boost::lock_guard<boost::mutex> lock(imageMutex);
+      std::lock_guard<std::mutex> lock(imageMutex);
       imageUsed++;
       storedImages[id].isUsed = false;
    }
@@ -122,7 +120,7 @@ void ImageManagerComplex::disposeImage(int id)
    write(imageFd,&val,sizeof(val));
 }
 
-boost::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
+std::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
 {
    if (convertedImageUsed == 0)
    {
@@ -134,7 +132,7 @@ boost::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
 
    {
       convertedImageUsed--;
-      boost::lock_guard<boost::mutex> lock(convertedImageMutex);
+      std::lock_guard<std::mutex> lock(convertedImageMutex);
 
       for (int i = 0; i < numOfImages; i ++)
       {
@@ -142,8 +140,8 @@ boost::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
          {
             storedConvertedImages[i].isUsed = true;
 
-            return boost::shared_ptr<ConvertedImage>(storedConvertedImages[i].image.get(),
-                   boost::bind(&ImageManagerComplex::disposeConvertedImage,this,i));
+            return std::shared_ptr<ConvertedImage>(storedConvertedImages[i].image.get(),
+                   std::bind(&ImageManagerComplex::disposeConvertedImage,this,i));
          }
       }
 
@@ -156,7 +154,7 @@ boost::shared_ptr<ConvertedImage> ImageManagerComplex::getConvertedImage()
 void ImageManagerComplex::disposeConvertedImage(int id)
 {
    {
-      boost::lock_guard<boost::mutex> lock(convertedImageMutex);
+      std::lock_guard<std::mutex> lock(convertedImageMutex);
       convertedImageUsed++;
       storedConvertedImages[id].isUsed = false;
    }

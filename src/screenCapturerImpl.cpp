@@ -1,22 +1,19 @@
 #include "screenCapturerImpl.hpp"
-#include <boost/make_shared.hpp>
 
 #include "screenReciever.hpp"
 #include <X11/extensions/Xfixes.h>
 
-#include <boost/bind.hpp>
-
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+using std::placeholders::_1;
 
-
-boost::shared_ptr<ScreenCapturer> ScreenCapturer::create(boost::shared_ptr<MessageQueue> queue,boost::shared_ptr<ConfigurationManager> config)
+std::unique_ptr<ScreenCapturer> ScreenCapturer::create(std::shared_ptr<MessageQueue> queue,std::shared_ptr<ConfigurationManager> config)
 {
-   return boost::make_shared<ScreenCapturerImpl>(queue,config);
+   return std::unique_ptr<ScreenCapturerImpl>(new ScreenCapturerImpl(queue,config));
 }
 
-ScreenCapturerImpl::ScreenCapturerImpl(boost::shared_ptr<MessageQueue> queue,boost::shared_ptr<ConfigurationManager> config) : ScreenCapturer(queue)
+ScreenCapturerImpl::ScreenCapturerImpl(std::shared_ptr<MessageQueue> queue,std::shared_ptr<ConfigurationManager> config) : ScreenCapturer(queue)
 {
    display = XOpenDisplay(NULL);
    root = DefaultRootWindow(display);
@@ -57,8 +54,8 @@ void ScreenCapturerImpl::stopCapture()
 void ScreenCapturerImpl::setImageManager()
 {
    manager = ImageManager::create(width,height);
-   reciever->pushIn(boost::bind(&ScreenReciever::setImageManager,_1,manager));
-   reciever->pushIn(boost::bind(&ScreenReciever::setSize,_1,width,height));
+   reciever->pushIn(std::bind(&ScreenReciever::setImageManager,std::placeholders::_1,manager));
+   reciever->pushIn(std::bind(&ScreenReciever::setSize,std::placeholders::_1,width,height));
    
 }
 
@@ -120,13 +117,13 @@ void ScreenCapturerImpl::captureScreen()
    stuff->time = time;
    //printf("I have captured a screen at %f\n",time);
 
-   reciever->pushIn(boost::bind(&ScreenReciever::processScreen,_1,stuff));
+   reciever->pushIn(std::bind(&ScreenReciever::processScreen,std::placeholders::_1,stuff));
    
    clock->sleepUntilNext(1.0/fps);
    pushIn(&ScreenCapturer::captureScreen);
 }
 
-void ScreenCapturerImpl::setScreenReciever(boost::shared_ptr<ScreenReciever> theReciever)
+void ScreenCapturerImpl::setScreenReciever(std::shared_ptr<ScreenReciever> theReciever)
 {
    reciever = theReciever;
 }

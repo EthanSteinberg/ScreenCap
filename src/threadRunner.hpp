@@ -1,24 +1,24 @@
 #ifndef THREAD_RUNNER_HPP_INCLUDED
 #define THREAD_RUNNER_HPP_INCLUDED
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "messageQueue.hpp"
 
-#include <boost/thread.hpp>
+#include <thread>
 
 class ThreadRunner
 {
 public:
-   static boost::shared_ptr<ThreadRunner> create();
-   virtual void run(boost::shared_ptr<MessageQueue> queue) = 0;
+   static std::unique_ptr<ThreadRunner> create();
+   virtual void run(std::shared_ptr<MessageQueue> queue) = 0;
 
-   static boost::thread createThread(boost::shared_ptr<MessageQueue> queue)
+   static std::thread createThread(std::shared_ptr<MessageQueue> queue)
    {
-      return boost::thread(&ThreadRunner::run, create(),queue);
+      return std::thread(&ThreadRunner::run, create(),queue);
    }
 
-protected:
-   ~ThreadRunner(){}
+   virtual ~ThreadRunner()
+   {}
 
 };
 

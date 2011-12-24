@@ -1,29 +1,29 @@
 #include "screenDumperX264.hpp"
 
-#include <boost/make_shared.hpp>
+
 #include <boost/scoped_array.hpp>
 
 struct ConvertedImage : public x264_picture_t
 {};
 
-boost::shared_ptr<ScreenDumper> ScreenDumper::create(boost::shared_ptr<MessageQueue> queue, boost::shared_ptr<ConfigurationManager> config)
+std::unique_ptr<ScreenDumper> ScreenDumper::create(std::shared_ptr<MessageQueue> queue, std::shared_ptr<ConfigurationManager> config)
 {
-   return boost::make_shared<ScreenDumperX264>(queue,config);
+   return std::unique_ptr<ScreenDumperX264>(new ScreenDumperX264(queue,config));
 }
 
-ScreenDumperX264::ScreenDumperX264(boost::shared_ptr<MessageQueue> queue, boost::shared_ptr<ConfigurationManager> config) : ScreenDumper(queue)
+ScreenDumperX264::ScreenDumperX264(std::shared_ptr<MessageQueue> queue, std::shared_ptr<ConfigurationManager> config) : ScreenDumper(queue)
 {
    fps = config->getOption<int>("fps");
    tmpDir = config->getOption<std::string>("tmpDir");
    outFile = config->getOption<std::string>("outFile");
 }
 
-void ScreenDumperX264::setImageManager(boost::shared_ptr<ImageManager> theManager)
+void ScreenDumperX264::setImageManager(std::shared_ptr<ImageManager> theManager)
 {
    manager = theManager;
 }
 
-void ScreenDumperX264::dumpImage(boost::shared_ptr<ConvertedImage> image)
+void ScreenDumperX264::dumpImage(std::shared_ptr<ConvertedImage> image)
 {
    x264_picture_t picOut;
 

@@ -7,9 +7,9 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 
-#set(CMAKE_CXX_COMPILER "/usr/bin/clang")
+#set(CMAKE_CXX_COMPILER "/usr/bin/ccache")
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g3  -O0 -Werror -Wshadow -Wextra -lswscale -lavformat -lpng -lX11 -lXext -lXfixes -lrt -lpthread")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -std=c++0x -g  -O0 -Werror -Wshadow -Wextra -lswscale -lavformat -lpng -lX11 -lXext -lXfixes -lrt -lpthread")
 
 
 

@@ -6,7 +6,10 @@
 class ThreadRunnerSimple : public ThreadRunner
 {
 public:
-   virtual void run(boost::shared_ptr<MessageQueue> qeueu);
+   virtual void run(std::shared_ptr<MessageQueue> qeueu);
+   
+   virtual ~ThreadRunnerSimple()
+   {}
 };
 
 

@@ -1,14 +1,15 @@
 #ifndef CONFIGURATIONMANAGER_HPP
 #define CONFIGURATIONMANAGER_HPP 
 
-#include <boost/shared_ptr.hpp>
+
+#include <memory>
 #include <string>
 #include <boost/any.hpp>
 
 class ConfigurationManager
 {
 public:
-   static boost::shared_ptr<ConfigurationManager> create();
+   static std::unique_ptr<ConfigurationManager> create();
    
    template< typename T>
    T getOption(const std::string& name)
@@ -22,8 +23,7 @@ public:
       setAny(name,thing);
    }
 
-protected:
-   ~ConfigurationManager()
+   virtual ~ConfigurationManager()
    {}
 
 private:

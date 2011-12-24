@@ -1,12 +1,12 @@
 #include "messageQueueLocked.hpp"
 
-#include <boost/make_shared.hpp>
+
 
 #include <sys/eventfd.h>
 
-boost::shared_ptr<MessageQueue> MessageQueue::create()
+std::unique_ptr<MessageQueue> MessageQueue::create()
 {
-   return boost::make_shared<MessageQueueLocked>();
+   return std::unique_ptr<MessageQueueLocked>(new MessageQueueLocked());
 }
 
 MessageQueueLocked::MessageQueueLocked()
@@ -14,15 +14,15 @@ MessageQueueLocked::MessageQueueLocked()
    readfd = eventfd(0,EFD_SEMAPHORE);
 }
 
-boost::function< void(void)> MessageQueueLocked::getNextOrWait()
+std::function< void(void)> MessageQueueLocked::getNextOrWait()
 {
    uint64_t num;
    read(readfd,&num, sizeof(num));
    //printf("The amount was %ld\n",num);
-   boost::function<void (void)> func;
+   std::function<void (void)> func;
 
    {
-      boost::lock_guard<boost::mutex> lock(mutex);
+      std::lock_guard<std::mutex> lock(mutex);
       func = queue.front();
       queue.pop();
    }
@@ -30,10 +30,10 @@ boost::function< void(void)> MessageQueueLocked::getNextOrWait()
    return func;
 }
 
-void MessageQueueLocked::pushIn(boost::function< void(void)> func)
+void MessageQueueLocked::pushIn(std::function< void(void)> func)
 {
    {
-      boost::lock_guard<boost::mutex> lock(mutex);
+      std::lock_guard<std::mutex> lock(mutex);
       queue.push(func);
    }
 

@@ -11,22 +11,22 @@
 
 namespace po = boost::program_options;
 
-boost::shared_ptr<ConfigurationManager> handleArgs(int argc, char** argv);
+std::unique_ptr<ConfigurationManager> handleArgs(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
-   auto configuration = handleArgs(argc,argv);
+   std::shared_ptr<ConfigurationManager> configuration = handleArgs(argc,argv);
 
 
-   auto signalHandlerQueue = MessageQueue::create();
-   auto screenCapturerQueue = MessageQueue::create();
-   auto screenRecieverQueue = MessageQueue::create();
-   auto screenDumperQueue = MessageQueue::create();
+   std::shared_ptr<MessageQueue> signalHandlerQueue = MessageQueue::create();
+   std::shared_ptr<MessageQueue> screenCapturerQueue = MessageQueue::create();
+   std::shared_ptr<MessageQueue> screenRecieverQueue = MessageQueue::create();
+   std::shared_ptr<MessageQueue> screenDumperQueue = MessageQueue::create();
 
-   auto signalHandler = SignalHandler::create(signalHandlerQueue);
-   auto screenCapturer = ScreenCapturer::create(screenCapturerQueue,configuration);
-   auto screenReciever = ScreenReciever::create(screenRecieverQueue,configuration);
-   auto screenDumper   = ScreenDumper::create(screenDumperQueue,configuration);
+   std::shared_ptr<SignalHandler> signalHandler = SignalHandler::create(signalHandlerQueue);
+   std::shared_ptr<ScreenCapturer> screenCapturer = ScreenCapturer::create(screenCapturerQueue,configuration);
+   std::shared_ptr<ScreenReciever> screenReciever = ScreenReciever::create(screenRecieverQueue,configuration);
+   std::shared_ptr<ScreenDumper> screenDumper   = ScreenDumper::create(screenDumperQueue,configuration);
 
 
    signalHandler->blockSignals();
@@ -37,10 +37,10 @@ int main(int argc, char** argv)
    screenCapturer->setScreenReciever(screenReciever);
    screenCapturer->setImageManager();
 
-   boost::thread signalThread   = ThreadRunner::createThread(signalHandlerQueue);
-   boost::thread capturerThread = ThreadRunner::createThread(screenCapturerQueue);
-   boost::thread recieverThread = ThreadRunner::createThread(screenRecieverQueue);
-   boost::thread dumperThread = ThreadRunner::createThread(screenDumperQueue);
+   std::thread signalThread   = ThreadRunner::createThread(signalHandlerQueue);
+   std::thread capturerThread = ThreadRunner::createThread(screenCapturerQueue);
+   std::thread recieverThread = ThreadRunner::createThread(screenRecieverQueue);
+   std::thread dumperThread = ThreadRunner::createThread(screenDumperQueue);
 
    signalHandler->pushIn(&SignalHandler::handleSignal);
 
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
    return 0;
 }
 
-boost::shared_ptr<ConfigurationManager> handleArgs(int argc, char** argv)
+std::unique_ptr<ConfigurationManager> handleArgs(int argc, char** argv)
 {
    po::positional_options_description p;
    p.add("output-file",1);

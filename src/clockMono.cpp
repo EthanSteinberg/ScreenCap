@@ -1,11 +1,13 @@
 #include "clockMono.hpp"
 
-#include <boost/make_shared.hpp>
+#include <cstdio>
+#include <cstdlib>
+
 #include <cstring>
 
-boost::shared_ptr<Clock> Clock::create()
+std::unique_ptr<Clock> Clock::create()
 {
-   return boost::make_shared<ClockMono>();
+   return std::unique_ptr<ClockMono>(new ClockMono());
 }
 
 void ClockMono::init()
