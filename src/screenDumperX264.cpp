@@ -124,9 +124,9 @@ void ScreenDumperX264::finish()
 
 
 
-   std::string command = "ffmpeg -y -vcodec copy -i ";
+   std::string command = "ffmpeg -y -i ";
    command+= filename;
-   command+= " ";
+   command+= " -vcodec copy ";
    command+= outFile;
    printf("%s\n",command.c_str());
 
