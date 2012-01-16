@@ -15,9 +15,10 @@ public:
    {
    }
 
-   void pushIn(std::function<void (T*)> func)
+   template<typename Func, typename ...Args>
+   void pushIn(Func func,Args&& ... args )
    {
-      myQueue->pushIn(std::bind(func, static_cast<T*>(this)));
+      myQueue->pushIn(std::bind(func, static_cast<T*>(this),std::forward<Args>(args)...));
    }
 
    void kill()

@@ -36,7 +36,7 @@ ScreenRecieverX264::ScreenRecieverX264(std::shared_ptr<MessageQueue> queue) : Sc
 void ScreenRecieverX264::setImageManager(std::shared_ptr<ImageManager> theManager)
 {
    manager = theManager;
-   dumper->pushIn(std::bind(&ScreenDumper::setImageManager,_1,manager));
+   dumper->pushIn(&ScreenDumper::setImageManager,manager);
 }
 
 void ScreenRecieverX264::setScreenDumper(std::shared_ptr<ScreenDumper> theDumper)
@@ -72,10 +72,10 @@ void ScreenRecieverX264::processScreen(std::shared_ptr<ImageType> image)
       printf("Forced to force a frame\n");
       forceMono++;
       pic_in->i_pts++;
-      dumper->pushIn(std::bind(&ScreenDumper::dumpImage,_1, picture));
+      dumper->pushIn(&ScreenDumper::dumpImage, picture);
    }
 
-   dumper->pushIn(std::bind(&ScreenDumper::dumpImage,_1, picture));
+   dumper->pushIn(&ScreenDumper::dumpImage, picture);
 
 
 }
@@ -93,7 +93,7 @@ void ScreenRecieverX264::setSize(int Width, int Height)
    width = Width;
    height = Height;
 
-   dumper->pushIn(std::bind(&ScreenDumper::setSize,_1,width,height));
+   dumper->pushIn(&ScreenDumper::setSize,width,height);
 
 }
 
