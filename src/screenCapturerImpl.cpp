@@ -54,8 +54,8 @@ void ScreenCapturerImpl::stopCapture()
 void ScreenCapturerImpl::setImageManager()
 {
    manager = ImageManager::create(width,height);
-   reciever->pushIn(std::bind(&ScreenReciever::setImageManager,std::placeholders::_1,manager));
-   reciever->pushIn(std::bind(&ScreenReciever::setSize,std::placeholders::_1,width,height));
+   reciever->pushIn(&ScreenReciever::setImageManager,manager);
+   reciever->pushIn(&ScreenReciever::setSize,width,height);
    
 }
 
@@ -117,7 +117,7 @@ void ScreenCapturerImpl::captureScreen()
    stuff->time = time;
    //printf("I have captured a screen at %f\n",time);
 
-   reciever->pushIn(std::bind(&ScreenReciever::processScreen,std::placeholders::_1,stuff));
+   reciever->pushIn(&ScreenReciever::processScreen,stuff);
    
    clock->sleepUntilNext(1.0/fps);
    pushIn(&ScreenCapturer::captureScreen);
